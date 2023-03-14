@@ -33,8 +33,18 @@ const CardNumberInput: React.FC = () => {
     };
 
     // Handlers
+    const onlyNumbers = (str: String) => {
+        const numbers = str
+          ?.match(/[\d]/g)
+          ?.map(Number)
+          .join('');
+        const result = numbers ? numbers : '';
+        return result;
+    };
+    
     const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>, index: number) => {
-        const { value } = event.target;
+        let { value } = event.target;
+        value = onlyNumbers(value);
         
         setCardInputValues((inputValues) => {
             const newInputValues = [...inputValues];
