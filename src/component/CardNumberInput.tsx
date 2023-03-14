@@ -42,7 +42,7 @@ const CardNumberInput: React.FC = () => {
         return result;
     };
     
-    const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>, index: number) => {
+    const InputChangeHandler = (event: React.ChangeEvent<HTMLInputElement>, index: number) => {
         let { value } = event.target;
         value = onlyNumbers(value);
         
@@ -57,7 +57,7 @@ const CardNumberInput: React.FC = () => {
         }
     };
 
-    const handleInputLocation = (event: React.FocusEvent<HTMLInputElement>, index: number) => {
+    const InputLocationHandler = (event: React.FocusEvent<HTMLInputElement>, index: number) => {
         if (event.target.value.length === 0 && cardInputRefs.current[index - 1]?.value.length !== 4) {
             cardInputRefs.current[index - 1]?.focus();
         }
@@ -92,8 +92,8 @@ const CardNumberInput: React.FC = () => {
             style={inputStyle}
             value={cardInputValues[index]}
             ref={(el) => (cardInputRefs.current[index] = el)}
-            onChange={(event) => handleInputChange(event, index)}
-            onFocus={(event) => handleInputLocation(event, index)}
+            onChange={(event) => InputChangeHandler(event, index)}
+            onFocus={(event) => InputLocationHandler(event, index)}
             onBlur={(event) => placeholderInputHandler(null)}
             maxLength={4}
         />
