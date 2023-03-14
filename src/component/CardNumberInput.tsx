@@ -12,9 +12,9 @@ const CardNumberInput: React.FC = () => {
 
     // Styles
     const divStyle: React.CSSProperties = {
-        display: 'flex', 
-        gap: '5px', 
-        height: '30px', 
+        display: 'flex',
+        gap: '5px',
+        height: '30px',
         justifyContent: 'space-evenly'
     };
 
@@ -45,6 +45,7 @@ const CardNumberInput: React.FC = () => {
     const placeholderInputHandler = (event: React.FormEvent<HTMLInputElement>) => {
         const target = event.target as HTMLInputElement;
         const value = target.value;
+
         setPlaceholderFlag(false);
         setCardInputValues([value, '', '', '']);
     };
@@ -57,6 +58,7 @@ const CardNumberInput: React.FC = () => {
             value={cardInputValues[index]}
             ref={(el) => (cardInputRefs.current[index] = el)}
             onChange={(event) => handleInputChange(event, index)}
+            maxLength={4}
         />
     ));
 
