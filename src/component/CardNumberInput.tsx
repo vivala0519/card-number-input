@@ -57,6 +57,12 @@ const CardNumberInput: React.FC = () => {
         }
     };
 
+    const handleInputLocation = (event: React.FocusEvent<HTMLInputElement>, index: number) => {
+        if (event.target.value.length === 0 && cardInputRefs.current[index - 1]?.value.length !== 4) {
+            cardInputRefs.current[index - 1]?.focus();
+        }
+    }
+
     const placeholderInputHandler = (event: React.FormEvent<HTMLInputElement> | null) => {
         if (!event) {
             let totalLength = 0;
