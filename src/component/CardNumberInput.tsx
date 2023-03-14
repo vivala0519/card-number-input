@@ -35,11 +35,16 @@ const CardNumberInput: React.FC = () => {
     // Handlers
     const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>, index: number) => {
         const { value } = event.target;
+        
         setCardInputValues((inputValues) => {
             const newInputValues = [...inputValues];
+
             newInputValues[index] = value;
             return newInputValues;
         });
+        if (value.length === 4) {
+            cardInputRefs.current[index + 1]?.focus();
+        }
     };
 
     const placeholderInputHandler = (event: React.FormEvent<HTMLInputElement>) => {
