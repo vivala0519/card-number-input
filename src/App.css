@@ -28,6 +28,26 @@
   color: #61dafb;
 }
 
+.grid-container {
+  display: grid;
+  /* grid-template-columns: 1fr 1fr; */
+  /* grid-template-rows: auto; 자동으로 줄의 높이 설정 */
+  grid-gap: 10px; /* 그리드 간격 */
+  padding: 10px;
+  border: 1px solid #e1e1e1;
+  border-radius: 5px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1608);
+}
+
+.span-1 {
+  grid-column: 1 / span 2; /* 첫째 줄의 두 열을 합쳐서 표시 */
+  
+}
+
+.span-2 {
+  width: 100%;
+}
+
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);
