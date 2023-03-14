@@ -67,14 +67,9 @@ const CardNumberInput: React.FC = () => {
         if (!event) {
             let totalLength = 0;
             cardInputRefs.current.forEach((el) => {
-                if (el) {
-                    totalLength += el?.value.length;
-                }
+                totalLength += el?.value.length ?? 0;
             })
-            console.log(totalLength);
-            if (totalLength === 0) {
-                setPlaceholderFlag(true);
-            }
+            setPlaceholderFlag(!totalLength);
         } else {
             const target = event.target as HTMLInputElement;
             const value = target.value;
@@ -94,7 +89,7 @@ const CardNumberInput: React.FC = () => {
             ref={(el) => (cardInputRefs.current[index] = el)}
             onChange={(event) => InputChangeHandler(event, index)}
             onFocus={(event) => InputLocationHandler(event, index)}
-            onBlur={(event) => placeholderInputHandler(null)}
+            onBlur={index === 0 ? () => placeholderInputHandler(null) : undefined}
             maxLength={4}
         />
     ));
