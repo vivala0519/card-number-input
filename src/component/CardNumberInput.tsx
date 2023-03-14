@@ -57,12 +57,26 @@ const CardNumberInput: React.FC = () => {
         }
     };
 
-    const placeholderInputHandler = (event: React.FormEvent<HTMLInputElement>) => {
-        const target = event.target as HTMLInputElement;
-        const value = target.value;
-
-        setPlaceholderFlag(false);
-        setCardInputValues([value, '', '', '']);
+    const placeholderInputHandler = (event: React.FormEvent<HTMLInputElement> | null) => {
+        if (!event) {
+            let totalLength = 0;
+            cardInputRefs.current.forEach((el) => {
+                if (el) {
+                    totalLength += el?.value.length;
+                }
+            })
+            console.log(totalLength);
+            if (totalLength === 0) {
+                setPlaceholderFlag(true);
+            }
+        } else {
+            const target = event.target as HTMLInputElement;
+            const value = target.value;
+    
+            setPlaceholderFlag(false);
+            setCardInputValues([value, '', '', '']);
+        }
+        
     };
 
     // JSX elements
@@ -73,6 +87,8 @@ const CardNumberInput: React.FC = () => {
             value={cardInputValues[index]}
             ref={(el) => (cardInputRefs.current[index] = el)}
             onChange={(event) => handleInputChange(event, index)}
+            onFocus={(event) => handleInputLocation(event, index)}
+            onBlur={(event) => placeholderInputHandler(null)}
             maxLength={4}
         />
     ));
