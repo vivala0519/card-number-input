@@ -42,8 +42,10 @@ const CardNumberInput: React.FC = () => {
         return result;
     };
     
-    const InputChangeHandler = (event: React.ChangeEvent<HTMLInputElement>, index: number) => {
-        let { value } = event.target;
+    const InputHandler = (event: React.FormEvent<HTMLInputElement>, index: number) => {
+        
+        let value = (event.target as HTMLInputElement).value;
+        
         value = onlyNumbers(value);
         
         setCardInputValues((inputValues) => {
@@ -52,9 +54,8 @@ const CardNumberInput: React.FC = () => {
             newInputValues[index] = value;
             return newInputValues;
         });
-        if (value.length === 4) {
-            cardInputRefs.current[index + 1]?.focus();
-        }
+        cardInputRefs.current[3]?.focus();
+        
     };
 
     const InputLocationHandler = (event: React.FocusEvent<HTMLInputElement>, index: number) => {
@@ -62,8 +63,35 @@ const CardNumberInput: React.FC = () => {
             cardInputRefs.current[index - 1]?.focus();
         }
     }
+    
+    const pasteHandler = (event: React.ClipboardEvent<HTMLInputElement> | null, index: number, atPlaceholder: String) => {
+        let chunks: any[] | null = [];
+        if (atPlaceholder) {
+            chunks = atPlaceholder.match(/.{1,4}/g);
+        } else {
+            const clipboardData = event?.clipboardData;
+            const pastedText = clipboardData?.getData("text");
+            const existedText = cardInputValues[index];
+            chunks = (existedText + pastedText).match(/.{1,4}/g);
+            
+        }
+      
+        if (chunks) {
+          for (let toPasteIndex = index; toPasteIndex < 4; toPasteIndex++) {
+            const currentChunkIndex = toPasteIndex - index;
+            
+            setCardInputValues((inputValues) => {
+              const newInputValues = [...inputValues];
+              
+              newInputValues[toPasteIndex] = onlyNumbers(chunks && chunks[currentChunkIndex]);
+              
+              return newInputValues;
+            });
+          }
+        }
+      };
 
-    const placeholderInputHandler = (event: React.FormEvent<HTMLInputElement> | null) => {
+    const placeholderInputHandler = async (event: React.FormEvent<HTMLInputElement> | null) => {
         if (!event) {
             let totalLength = 0;
             cardInputRefs.current.forEach((el) => {
@@ -71,25 +99,31 @@ const CardNumberInput: React.FC = () => {
             })
             setPlaceholderFlag(!totalLength);
         } else {
-            const target = event.target as HTMLInputElement;
-            const value = target.value;
+            if ((event.nativeEvent as InputEvent).inputType === 'insertFromPaste') {
+                const pastedText = await navigator.clipboard.readText();
+                pasteHandler(null, 0, pastedText);
+            } else {
+                const target = event.target as HTMLInputElement;
+                const value = target.value;
+                setCardInputValues([value, '', '', '']);
+            }
     
             setPlaceholderFlag(false);
-            setCardInputValues([value, '', '', '']);
         }
-        
     };
 
     // JSX elements
     const cardInputList: JSX.Element[] = inputNames.map((item, index) => (
         <input
             key={item}
+            type='text'
             style={inputStyle}
             value={cardInputValues[index]}
             ref={(el) => (cardInputRefs.current[index] = el)}
-            onChange={(event) => InputChangeHandler(event, index)}
+            onInput={(event) => InputHandler(event as React.FormEvent<HTMLInputElement>, index)}
             onFocus={(event) => InputLocationHandler(event, index)}
-            onBlur={index === 0 ? () => placeholderInputHandler(null) : undefined}
+            onBlur={() => placeholderInputHandler(null)}
+            onPaste={(event) => pasteHandler(event, index, '')}
             maxLength={4}
         />
     ));
@@ -97,7 +131,7 @@ const CardNumberInput: React.FC = () => {
     // Effects
     useEffect(() => {
         if (!placeholderFlag) {
-            cardInputRefs.current[0]?.focus();
+            cardInputRefs.current[3]?.focus();
             }
         }, [placeholderFlag]
     );
@@ -106,7 +140,11 @@ const CardNumberInput: React.FC = () => {
     return (
         <div className="span-1" style={divStyle}>
             {placeholderFlag && (
-                <input placeholder={placeholderText} style={placeholderStyle} onInput={placeholderInputHandler} />
+                <input 
+                    placeholder={placeholderText}
+                    style={placeholderStyle}
+                    onInput={placeholderInputHandler}
+                    maxLength={4}/>
             )}
             {!placeholderFlag && cardInputList}
         </div>
