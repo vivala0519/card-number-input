@@ -33,7 +33,13 @@ const CardNumberInput: React.FC = () => {
     };
 
     // Handlers
-    const onlyNumbers = (str: String) => {
+
+    /**
+     * @description filter only number from string
+     * @param str
+     * @returns result: String
+     */
+    const acceptOnlyNumber = (str: String) => {
         const numbers = str
           ?.match(/[\d]/g)
           ?.map(Number)
@@ -42,40 +48,57 @@ const CardNumberInput: React.FC = () => {
         return result;
     };
     
-    const InputHandler = (event: React.FormEvent<HTMLInputElement>, index: number) => {
-        
+    /**
+     * @description onInput at cardNumber input
+     * @param event, index
+     */
+    const cardNumberInputHandler = (event: React.FormEvent<HTMLInputElement>, index: number) => {
         let value = (event.target as HTMLInputElement).value;
         
-        value = onlyNumbers(value);
+        value = acceptOnlyNumber(value);
         
+        // update value
         setCardInputValues((inputValues) => {
             const newInputValues = [...inputValues];
 
             newInputValues[index] = value;
             return newInputValues;
         });
-        cardInputRefs.current[3]?.focus();
-        
+
+        // focus at last text. Automatically trigger the 'focusLocationHandler' method
+        if (value.length === 4) {
+            cardInputRefs.current[3]?.focus();
+        }
     };
 
-    const InputLocationHandler = (event: React.FocusEvent<HTMLInputElement>, index: number) => {
+    /**
+     * @description Auto focusing. onFocus at card number input
+     * @param event, index
+     */
+    const focusLocationHandler = (event: React.FocusEvent<HTMLInputElement>, index: number) => {
         if (event.target.value.length === 0 && cardInputRefs.current[index - 1]?.value.length !== 4) {
             cardInputRefs.current[index - 1]?.focus();
         }
     }
     
+    /**
+     * @description Pasted text from onInput(cardNumber input), placeholderInputHandler
+     * @param event, index, atPlaceholder
+     */
     const pasteHandler = (event: React.ClipboardEvent<HTMLInputElement> | null, index: number, atPlaceholder: String) => {
         let chunks: any[] | null = [];
+
+        // is it from placeholder input?
         if (atPlaceholder) {
-            chunks = atPlaceholder.match(/.{1,4}/g);
-        } else {
+            chunks = acceptOnlyNumber(atPlaceholder).match(/.{1,4}/g);
+        } else { // from card number input
             const clipboardData = event?.clipboardData;
             const pastedText = clipboardData?.getData("text");
             const existedText = cardInputValues[index];
-            chunks = (existedText + pastedText).match(/.{1,4}/g);
-            
+            chunks = acceptOnlyNumber(existedText + pastedText).match(/.{1,4}/g);
         }
       
+        // Break it up into 4 characters and put them in respective input
         if (chunks) {
           for (let toPasteIndex = index; toPasteIndex < 4; toPasteIndex++) {
             const currentChunkIndex = toPasteIndex - index;
@@ -83,7 +106,7 @@ const CardNumberInput: React.FC = () => {
             setCardInputValues((inputValues) => {
               const newInputValues = [...inputValues];
               
-              newInputValues[toPasteIndex] = onlyNumbers(chunks && chunks[currentChunkIndex]);
+              newInputValues[toPasteIndex] = chunks && chunks[currentChunkIndex];
               
               return newInputValues;
             });
@@ -91,18 +114,27 @@ const CardNumberInput: React.FC = () => {
         }
       };
 
+    /**
+     * @description handler from onBlur at cardNumber input, onInput at placeholder input
+     * @param event
+     */
     const placeholderInputHandler = async (event: React.FormEvent<HTMLInputElement> | null) => {
+        // when blur at cardNumber input
         if (!event) {
             let totalLength = 0;
             cardInputRefs.current.forEach((el) => {
                 totalLength += el?.value.length ?? 0;
             })
+            // placeholder flag as inputText
             setPlaceholderFlag(!totalLength);
-        } else {
+
+        } else { // when input at placeholder input
+            // copied text
             if ((event.nativeEvent as InputEvent).inputType === 'insertFromPaste') {
+                
                 const pastedText = await navigator.clipboard.readText();
                 pasteHandler(null, 0, pastedText);
-            } else {
+            } else { // text from typing
                 const target = event.target as HTMLInputElement;
                 const value = target.value;
                 setCardInputValues([value, '', '', '']);
@@ -120,8 +152,8 @@ const CardNumberInput: React.FC = () => {
             style={inputStyle}
             value={cardInputValues[index]}
             ref={(el) => (cardInputRefs.current[index] = el)}
-            onInput={(event) => InputHandler(event as React.FormEvent<HTMLInputElement>, index)}
-            onFocus={(event) => InputLocationHandler(event, index)}
+            onInput={(event) => cardNumberInputHandler(event as React.FormEvent<HTMLInputElement>, index)}
+            onFocus={(event) => focusLocationHandler(event, index)}
             onBlur={() => placeholderInputHandler(null)}
             onPaste={(event) => pasteHandler(event, index, '')}
             maxLength={4}
